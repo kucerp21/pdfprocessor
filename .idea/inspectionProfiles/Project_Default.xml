@@ -1,0 +1,19 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="4">
+            <item index="0" class="java.lang.String" itemvalue="confusables==0.5.900" />
+            <item index="1" class="java.lang.String" itemvalue="django-s3-storage==0.13.2.twisto.1" />
+            <item index="2" class="java.lang.String" itemvalue="django-nested-inline==0.4.2.twisto.2" />
+            <item index="3" class="java.lang.String" itemvalue="GDAL" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="Stylelint" enabled="true" level="ERROR" enabled_by_default="true" />
+  </profile>
+</component>
