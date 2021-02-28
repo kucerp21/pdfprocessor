@@ -2,16 +2,14 @@ import uuid
 
 from django.db import models
 
-from .validators import validate_pdf_file_extension
+from .utils.validators import validate_pdf_file_extension
 
 
 class PDFDocument(models.Model):
-    document_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-
-    date_uploaded = models.DateTimeField(auto_created=True)
+    date_uploaded = models.DateTimeField(auto_now_add=True)
     date_processed = models.DateTimeField(null=True, blank=True)
 
-    original_document = models.ImageField(upload_to='pdf_document/%Y/%m/%d', validators=[validate_pdf_file_extension])
+    original_document = models.FileField(upload_to='pdf_document/%Y/%m/%d', validators=[validate_pdf_file_extension])
 
     @property
     def is_processed(self):
@@ -21,8 +19,14 @@ class PDFDocument(models.Model):
     def page_count(self):
         return len(self.pages)
 
+    class Meta:
+        verbose_name = "PDF Document"
+
 
 class PDFPage(models.Model):
     document = models.ForeignKey('PDFDocument', related_name='pages', on_delete=models.CASCADE)
     page_number = models.IntegerField()
     page = models.ImageField(upload_to='pdf_page')
+
+    class Meta:
+        verbose_name = "PDF Page"

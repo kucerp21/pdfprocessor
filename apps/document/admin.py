@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import PDFDocument, PDFPage
 
-# Register your models here.
+
+admin.site.register(PDFDocument)
+admin.site.register(PDFPage)
