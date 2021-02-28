@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class DocumentConfig(AppConfig):
-    name = 'document'
+    name = 'apps.document'
+    verbose_name = 'Document'
