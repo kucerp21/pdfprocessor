@@ -31,6 +31,7 @@ class PDFDocument(models.Model):
 
 
 class PDFPage(models.Model):
+    NORMALIZED_SIZE = 1200, 1600
     document = models.ForeignKey('PDFDocument', related_name='pages', on_delete=models.CASCADE)
     page_number = models.IntegerField()
     page = models.ImageField(upload_to='pdf_page')
