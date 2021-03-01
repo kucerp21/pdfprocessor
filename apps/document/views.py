@@ -1,32 +1,19 @@
 import logging
 
-from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework import status
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
-from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+from django.http import HttpResponse
 
-from .serializers.document import PDFPageSerializer, PDFDocumentSerializer, PDFDocumentNormalizationStateSerializer
+from .serializers.document import PDFDocumentSerializer, PDFDocumentNormalizationStateSerializer, PDFPageSerializer
 from .models import PDFPage, PDFDocument
 from worker.tasks import normalize_pdf
 
 logger = logging.getLogger(__name__)
 
 
-class PDFPageViewSet(viewsets.ViewSet):
-    queryset = PDFPage.objects.all()
-    serializer_class = PDFPageSerializer
-
-    def get_object(self, view_name, view_args, view_kwargs):
-        lookup_kwargs = {
-            'document__document_id': view_kwargs['document_id'],
-            'page_num': view_kwargs['page_number']
-        }
-        return self.queryset.filter(**lookup_kwargs)
-
-    # def list(self, request):
-    #     pass
-
-
-class PDFDocumentViewSet(viewsets.GenericViewSet, CreateModelMixin, RetrieveModelMixin):
+class PDFDocumentViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
     queryset = PDFDocument.objects.all()
     serializer_class = PDFDocumentSerializer
 
@@ -45,3 +32,27 @@ class PDFDocumentViewSet(viewsets.GenericViewSet, CreateModelMixin, RetrieveMode
             return PDFDocumentNormalizationStateSerializer
         if self.action == 'create':
             return PDFDocumentSerializer
+        if self.action == 'pages':
+            return PDFPageSerializer
+
+    @action(methods=['get'], detail=True, url_path=r'pages/(?P<page_num>\d+)', url_name='pages')
+    def pages(self, request, pk=None, page_num=None):
+        instance = self.get_object()
+
+        image_file = instance.page.open()
+        response = HttpResponse(image_file, content_type='image/png')
+        response['Content-Length'] = instance.page.size
+        response['Content-Disposition'] = f'attachment; filename={instance.page.name}'
+
+        return response
+
+    def get_object(self):
+        if self.action == 'pages':
+            doc_id = self.kwargs.get('pk')
+            page_num = self.kwargs.get('page_num')
+            return PDFPage.objects.get(document=doc_id, page_number=page_num)
+        else:
+            return super().get_object()
+
+
+

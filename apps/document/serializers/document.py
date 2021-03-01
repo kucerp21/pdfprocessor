@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.reverse import reverse as rf_reverse
 
 from ..models import PDFDocument, PDFPage
 
@@ -23,6 +22,7 @@ class PDFDocumentNormalizationStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PDFDocument
         fields = ['status', 'n_pages']
+
 
 class PDFPageSerializer(serializers.ModelSerializer):
     class Meta:
