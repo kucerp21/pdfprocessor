@@ -19,9 +19,14 @@ pyenv activate pdfprocessor
 ```
 sudo docker-compose build
 ```
-4. Now you can run/stop the application by using commands
+4. Run the app, migrate database, create super user
 ```
 sudo docker-compose up (-d)
+sudo docker-compose run api python manage.py migrate
+sudo docker-compose run api python manage.py createsuperuser
+```
+5. You can now develop and test the application. To stop the application, run:
+```
 sudo docker-compose down
 ```
 
