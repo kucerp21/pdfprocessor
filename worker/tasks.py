@@ -23,7 +23,7 @@ def normalize_pdf(self, doc_id):
         logger.info(f'Document id {doc_id} not found')
         return
 
-    # simulate normalizing
+    # simulate normalizing delay
     if settings.DEBUG:
         time.sleep(10)
 
