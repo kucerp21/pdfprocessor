@@ -100,3 +100,11 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, '../media')
 
 MEDIA_URL = '/media/'
+
+CELERY = {
+    'broker_url': os.environ['CELERY_BROKER'],
+    'imports': ('worker.tasks', ),
+    'task_serializer': 'json',
+    'result_serializer': 'json',
+    'accept_content': ['json'],
+}

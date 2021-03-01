@@ -1,9 +1,14 @@
-from rest_framework import viewsets, mixins, status
-from rest_framework.mixins import CreateModelMixin
+import logging
+
+from rest_framework import viewsets, status
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
-from .serializers.document import PDFPageSerializer, PDFDocumentSerializer
+from .serializers.document import PDFPageSerializer, PDFDocumentSerializer, PDFDocumentNormalizationStateSerializer
 from .models import PDFPage, PDFDocument
+from worker.tasks import normalize_pdf
+
+logger = logging.getLogger(__name__)
 
 
 class PDFPageViewSet(viewsets.ViewSet):
@@ -21,14 +26,22 @@ class PDFPageViewSet(viewsets.ViewSet):
     #     pass
 
 
-class PDFDocumentViewSet(viewsets.GenericViewSet, CreateModelMixin):
+class PDFDocumentViewSet(viewsets.GenericViewSet, CreateModelMixin, RetrieveModelMixin):
     queryset = PDFDocument.objects.all()
     serializer_class = PDFDocumentSerializer
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
 
-        # TODO start async normalization
+        doc_id = response.data['id']
+        normalize_pdf.s(doc_id=doc_id).delay()
+        logger.info(f'Document id {doc_id} normalization has STARTED')
 
         response.status_code = status.HTTP_202_ACCEPTED
         return response
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return PDFDocumentNormalizationStateSerializer
+        if self.action == 'create':
+            return PDFDocumentSerializer

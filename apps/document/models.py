@@ -6,6 +6,7 @@ from .utils.validators import validate_pdf_file_extension
 
 
 class PDFDocument(models.Model):
+
     date_uploaded = models.DateTimeField(auto_now_add=True)
     date_processed = models.DateTimeField(null=True, blank=True)
 
@@ -17,7 +18,13 @@ class PDFDocument(models.Model):
 
     @property
     def page_count(self):
-        return len(self.pages)
+        return self.pages.count()
+
+    def get_status_display(self):
+        if self.is_processed:
+            return 'done'
+        else:
+            return 'processing'
 
     class Meta:
         verbose_name = "PDF Document"

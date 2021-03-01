@@ -7,8 +7,7 @@ app_name = 'document'
 
 router = routers.DefaultRouter()
 router.register(r'document', PDFDocumentViewSet)
-router.register(r'document/<document_id>', PDFDocumentViewSet)
-router.register(r'document/<document_id>/page/<page_number>', PDFPageViewSet)
+# router.register(r'document/<document_id>/page/<page_number>', PDFPageViewSet)
 
 urlpatterns = [
     path('', include(router.urls))

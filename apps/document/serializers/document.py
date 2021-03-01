@@ -13,6 +13,17 @@ class PDFDocumentSerializer(serializers.ModelSerializer):
         }
 
 
+class PDFDocumentNormalizationStateSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField(read_only=True)
+    n_pages = serializers.IntegerField(read_only=True, source='page_count')
+
+    def get_status(self, obj):
+        return obj.get_status_display()
+
+    class Meta:
+        model = PDFDocument
+        fields = ['status', 'n_pages']
+
 class PDFPageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PDFPage
