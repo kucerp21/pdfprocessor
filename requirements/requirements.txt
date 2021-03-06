@@ -16,6 +16,7 @@ poppler-utils==0.1.0
 prompt-toolkit==3.0.16
 psycopg2==2.8.6
 psycopg2-binary==2.8.6
+PyPDF2==1.26.0
 pytz==2021.1
 six==1.15.0
 sqlparse==0.4.1

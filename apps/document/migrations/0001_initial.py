@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date_uploaded', models.DateTimeField(auto_now_add=True)),
                 ('date_processed', models.DateTimeField(blank=True, null=True)),
-                ('original_document', models.FileField(upload_to='pdf_document/%Y/%m/%d', validators=[apps.document.utils.validators.validate_pdf_file_extension])),
+                ('original_document', models.FileField(upload_to='pdf_document/%Y/%m/%d', validators=[apps.document.utils.validators.validate_pdf_file])),
             ],
             options={
                 'verbose_name': 'PDF Document',

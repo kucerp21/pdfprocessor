@@ -10,6 +10,7 @@ from django.core.files import File
 
 from .worker import app
 from apps.document.models import PDFDocument, PDFPage
+from pdfprocessor.exceptions import NormalizationException
 
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 @app.task(bind=True, name='normalize_pdf')
 @transaction.atomic()
-def normalize_pdf(self, doc_id):
+def normalize_pdf_and_save_pages(self, doc_id: int) -> None:
     doc_object = PDFDocument.objects.get(id=doc_id)
     if not doc_object:
         logger.info(f'Document id {doc_id} not found')
@@ -27,18 +28,26 @@ def normalize_pdf(self, doc_id):
     if settings.DEBUG:
         time.sleep(10)
 
-    # normalize pdf
-    pages = convert_from_path(doc_object.original_document.path)
+    try:
+        normalize_pdf(doc_object)
+    except Exception:
+        doc_object.date_failed = datetime.datetime.now()
+        doc_object.save()
+        logger.error(f'Document id {doc_id} normalization has FAILED')
+        raise NormalizationException()
+
+    doc_object.date_processed = datetime.datetime.now()
+    doc_object.save()
+    logger.info(f'Document id {doc_id} normalization has FINISHED')
+
+
+def normalize_pdf(document: PDFDocument) -> None:
+    pages = convert_from_path(document.original_document.path)
     for count, page in enumerate(pages):
         page.thumbnail(PDFPage.NORMALIZED_SIZE)
         # convert to savable PNG
         blob = BytesIO()
         page.save(blob, 'PNG')
 
-        page_obj = PDFPage(document=doc_object, page_number=count)
+        page_obj = PDFPage(document=document, page_number=count+1)
         page_obj.page.save(f'{page_obj.document.id}_{page_obj.page_number}.png', File(blob))
-
-    # mark pdf as processed
-    doc_object.date_processed = datetime.datetime.now()
-    doc_object.save()
-    logger.info(f'Document id {doc_id} normalization has FINISHED')

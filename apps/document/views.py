@@ -8,7 +8,8 @@ from django.http import HttpResponse
 
 from .serializers.document import PDFDocumentSerializer, PDFDocumentNormalizationStateSerializer, PDFPageSerializer
 from .models import PDFPage, PDFDocument
-from worker.tasks import normalize_pdf
+from worker.tasks import normalize_pdf_and_save_pages
+from apps.document.utils.validators import validate_pdf_file
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +19,11 @@ class PDFDocumentViewSet(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
     serializer_class = PDFDocumentSerializer
 
     def create(self, request, *args, **kwargs):
+        validate_pdf_file(request.data['original_document'])
         response = super().create(request, *args, **kwargs)
 
         doc_id = response.data['id']
-        normalize_pdf.s(doc_id=doc_id).delay()
+        normalize_pdf_and_save_pages.s(doc_id=doc_id).delay()
         logger.info(f'Document id {doc_id} normalization has STARTED')
 
         response.status_code = status.HTTP_202_ACCEPTED
